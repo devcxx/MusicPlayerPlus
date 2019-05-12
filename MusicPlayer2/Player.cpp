@@ -1176,6 +1176,10 @@ void CPlayer::ExploreLyric() const
 
 Time CPlayer::GetAllSongLength(int track) const
 {
+	if (m_playlist[track].duration) {
+		return Time(m_playlist[track].duration);
+	}
+
 	if (track >= 0 && track < GetSongNum())
 		return m_playlist[track].lengh;
 	else
