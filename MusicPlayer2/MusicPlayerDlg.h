@@ -67,7 +67,10 @@ protected:
 	CMenu m_main_popup_menu;		//按住Shift键时弹出的右键菜单
 	CButton m_set_path_button;
 	CEdit m_search_edit;
+	CButton m_search_prev_page_button;
+	CButton m_search_next_page_button;
 	CButton m_clear_search_button;
+	int m_current_page_idx{1};
 
 #ifndef COMPILE_IN_WIN_XP
 	ITaskbarList3* m_pTaskbar{ theApp.GetITaskbarList3() };          //用于支持任务栏显示播放进度
@@ -263,6 +266,8 @@ protected:
 public:
 	afx_msg void OnEnChangeSearchEdit();
 	afx_msg void OnBnClickedClearSearchButton();
+	afx_msg void OnBnClickedSearchPrevPageButton();
+	afx_msg void OnBnClickedSearchNextPageButton();
 	afx_msg void OnDownloadAlbumCover();
 protected:
 	afx_msg LRESULT OnMusicStreamOpened(WPARAM wParam, LPARAM lParam);

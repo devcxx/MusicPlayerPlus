@@ -56,7 +56,9 @@ void CMusicPlayerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PATH_EDIT, m_path_edit);
 	DDX_Control(pDX, ID_SET_PATH, m_set_path_button);
 	DDX_Control(pDX, IDC_SEARCH_EDIT, m_search_edit);
-	DDX_Control(pDX, IDC_CLEAR_SEARCH_BUTTON, m_clear_search_button);
+// 	DDX_Control(pDX, IDC_CLEAR_SEARCH_BUTTON, m_clear_search_button);
+	DDX_Control(pDX, IDC_SEARCH_PREV_PAGE_BTN, m_search_prev_page_button);
+	DDX_Control(pDX, IDC_SEARCH_NEXT_PAGE_BTN, m_search_next_page_button);
 }
 
 BEGIN_MESSAGE_MAP(CMusicPlayerDlg, CMainDialogBase)
@@ -141,7 +143,9 @@ BEGIN_MESSAGE_MAP(CMusicPlayerDlg, CMainDialogBase)
 	ON_MESSAGE(WM_PATH_SELECTED, &CMusicPlayerDlg::OnPathSelected)
 	ON_MESSAGE(WM_CONNOT_PLAY_WARNING, &CMusicPlayerDlg::OnConnotPlayWarning)
 	ON_EN_CHANGE(IDC_SEARCH_EDIT, &CMusicPlayerDlg::OnEnChangeSearchEdit)
-	ON_BN_CLICKED(IDC_CLEAR_SEARCH_BUTTON, &CMusicPlayerDlg::OnBnClickedClearSearchButton)
+// 	ON_BN_CLICKED(IDC_CLEAR_SEARCH_BUTTON, &CMusicPlayerDlg::OnBnClickedClearSearchButton)
+	ON_BN_CLICKED(IDC_SEARCH_PREV_PAGE_BTN, &CMusicPlayerDlg::OnBnClickedSearchPrevPageButton)
+	ON_BN_CLICKED(IDC_SEARCH_NEXT_PAGE_BTN, &CMusicPlayerDlg::OnBnClickedSearchNextPageButton)
 	ON_COMMAND(ID_DOWNLOAD_ALBUM_COVER, &CMusicPlayerDlg::OnDownloadAlbumCover)
 	ON_MESSAGE(WM_MUSIC_STREAM_OPENED, &CMusicPlayerDlg::OnMusicStreamOpened)
 	ON_COMMAND(ID_CURRENT_EXPLORE_ONLINE, &CMusicPlayerDlg::OnCurrentExploreOnline)
@@ -411,22 +415,33 @@ void CMusicPlayerDlg::SetPlaylistSize(int cx, int cy)
 	m_search_edit.GetWindowRect(rect_search);
 	if (!theApp.m_ui_data.narrow_mode)
 	{
-		rect_search.right = rect_search.left + (cx / 2 - 2 * m_layout.margin - m_layout.margin - rect_search.Height());
+		rect_search.right = rect_search.left + (cx / 2 - 3 * m_layout.margin - m_layout.margin - 2*rect_search.Height());
 		rect_search.MoveToXY(cx / 2 + m_layout.margin, m_layout.path_edit_height + theApp.DPI(1));
 	}
 	else
 	{
-		rect_search.right = rect_search.left + (cx - 2 * m_layout.margin - m_layout.margin - rect_search.Height());
+		rect_search.right = rect_search.left + (cx - 3 * m_layout.margin - m_layout.margin - 2*rect_search.Height());
 		rect_search.MoveToXY(m_layout.margin, m_ui.DrawAreaHeight() + m_layout.path_edit_height - theApp.DPI(3));
 	}
+	
 	m_search_edit.MoveWindow(rect_search);
 	//设置清除搜索按钮的大小和位置
-	CRect rect_clear{};
-	rect_clear.right = rect_clear.bottom = rect_search.Height();
+	CRect prev_page{}, next_page{}, clear_rect{};
+	prev_page.right = prev_page.bottom = rect_search.Height();
 	//if (!theApp.m_ui_data.narrow_mode)
-		rect_clear.MoveToXY(rect_search.right + m_layout.margin, rect_search.top);
-	m_clear_search_button.MoveWindow(rect_clear);
-	m_clear_search_button.Invalidate();
+	prev_page.MoveToXY(rect_search.right + m_layout.margin, rect_search.top);
+	m_search_prev_page_button.MoveWindow(prev_page);
+	m_search_prev_page_button.Invalidate();
+
+	next_page.right = next_page.bottom = rect_search.Height();
+	next_page.MoveToXY(prev_page.right + m_layout.margin, prev_page.top);
+	m_search_next_page_button.MoveWindow(next_page);
+	m_search_next_page_button.Invalidate();
+
+// 	clear_rect.right = clear_rect.bottom = rect_search.Height();
+// 	clear_rect.MoveToXY(next_page.right + m_layout.margin, next_page.top);
+// 	m_clear_search_button.MoveWindow(clear_rect);
+// 	m_clear_search_button.Invalidate();
 }
 
 void CMusicPlayerDlg::SetAlwaysOnTop()
@@ -502,7 +517,7 @@ void CMusicPlayerDlg::SetPlaylistVisible()
 	m_path_static.ShowWindow(cmdShow);
 	m_path_edit.ShowWindow(cmdShow);
 	m_search_edit.ShowWindow(cmdShow);
-	m_clear_search_button.ShowWindow(cmdShow);
+// 	m_clear_search_button.ShowWindow(cmdShow);
 	m_set_path_button.ShowWindow(cmdShow);
 }
 
@@ -606,7 +621,7 @@ void CMusicPlayerDlg::EnablePlaylist(bool enable)
 {
 	m_playlist_list.EnableWindow(enable);
 	m_search_edit.EnableWindow(enable);
-	m_clear_search_button.EnableWindow(enable);
+// 	m_clear_search_button.EnableWindow(enable);
 }
 
 
@@ -896,7 +911,9 @@ BOOL CMusicPlayerDlg::OnInitDialog()
 	//m_Mytip.AddTool(GetDlgItem(IDC_VOLUME_DOWN), _T("减小音量"));
 	//m_Mytip.AddTool(GetDlgItem(IDC_VOLUME_UP), _T("增大音量"));
 	//m_Mytip.AddTool(&m_time_static, CCommon::LoadText(IDS_PLAY_TIME));
-	m_Mytip.AddTool(&m_clear_search_button, CCommon::LoadText(IDS_CLEAR_SEARCH_RESULT));
+// 	m_Mytip.AddTool(&m_clear_search_button, CCommon::LoadText(IDS_CLEAR_SEARCH_RESULT));
+	m_Mytip.AddTool(&m_search_prev_page_button, _T("上一页"));
+	m_Mytip.AddTool(&m_search_next_page_button, _T("下一页"));
 	m_Mytip.AddTool(&m_search_edit, CCommon::LoadText(IDS_INPUT_KEY_WORD));
 	m_ui.SetToolTip(&m_Mytip);
 	m_ui2.SetToolTip(&m_Mytip);
@@ -1418,6 +1435,7 @@ BOOL CMusicPlayerDlg::PreTranslateMessage(MSG* pMsg)
 
 		if (GetFocus() == GetDlgItem(IDC_SEARCH_EDIT))
 		{
+			m_current_page_idx = 1;
 			UpdateSearchList();
 // 			m_playlist_list.QuickSearch(wstring(key_word));
 			m_playlist_list.ShowPlaylist(theApp.m_ui_data.display_format, m_searched);
@@ -2812,7 +2830,7 @@ afx_msg LRESULT CMusicPlayerDlg::OnConnotPlayWarning(WPARAM wParam, LPARAM lPara
 vector<SongInfo> g_song_info;
 vector<KgSongInfo> g_kgsong_info;
 
-std::string KG_SEARCH_API = "http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword={0}&page=1&pagesize=20&showtype=1";
+std::string KG_SEARCH_API = "http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword={0}&page={1}&pagesize=20&showtype=1";
 std::string KG_DOWN_API = "http://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash={0}";
 
 
@@ -2827,7 +2845,7 @@ void CMusicPlayerDlg::UpdateSearchList()
 	songInfos.clear();
 	std::string search_api, down_api;
 
-	search_api = fmt::format(KG_SEARCH_API, cvt::ws2s(key_word.GetBuffer(0)));
+	search_api = fmt::format(KG_SEARCH_API, cvt::ws2s(key_word.GetBuffer(0)), m_current_page_idx);
 
 	RestClient::Response resp = RestClient::get(cvt::s2utf8(search_api));
 	Json::Reader reader;
@@ -2906,6 +2924,22 @@ void CMusicPlayerDlg::OnBnClickedClearSearchButton()
 	}
 }
 
+
+void CMusicPlayerDlg::OnBnClickedSearchPrevPageButton()
+{
+	if (CPlayer::GetInstance().GetCurrentPageIndex() > 1)
+		CPlayer::GetInstance().GetCurrentPageIndex()--;
+	UpdateSearchList();
+	m_playlist_list.ShowPlaylist(theApp.m_ui_data.display_format, m_searched);
+}
+
+
+void CMusicPlayerDlg::OnBnClickedSearchNextPageButton()
+{
+	CPlayer::GetInstance().GetCurrentPageIndex()++;
+	UpdateSearchList();
+	m_playlist_list.ShowPlaylist(theApp.m_ui_data.display_format, m_searched);
+}
 
 void CMusicPlayerDlg::OnDownloadAlbumCover()
 {

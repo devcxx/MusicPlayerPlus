@@ -206,7 +206,8 @@ public:
 	Time GetAllSongLength(int track) const;				//获取指定序号的歌曲的长度
 	int GetSongNum() const;			//获取歌曲总数
 	const wstring& GetCurrentDir() const { return m_path; }	//获取当前目录
-
+	int m_current_page_idx{ 1 };
+	int& GetCurrentPageIndex() { return m_current_page_idx; }
 
 	std::wstring GetAppPath();
 	std::wstring GetLyricPath();

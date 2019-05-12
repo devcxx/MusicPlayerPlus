@@ -64,6 +64,7 @@ void CPlayListCtrl::ShowPlaylist(DisplayFormat display_format, bool search_resul
 	{
 		int item_num_before = GetItemCount();
 		int item_num_after = CPlayer::GetInstance().GetSongNum();
+		int current_page_idx = CPlayer::GetInstance().GetCurrentPageIndex();
 		//如果当前列表中项目的数量小于原来的，则直接清空原来列表中所有的项目，重新添加
 		if (item_num_after < item_num_before)
 		{
@@ -73,7 +74,7 @@ void CPlayListCtrl::ShowPlaylist(DisplayFormat display_format, bool search_resul
 		CString str;
 		for (int i{}; i < item_num_after; i++)
 		{
-			str.Format(_T("%u"), i + 1);
+			str.Format(_T("%u"), i + 1 + (current_page_idx-1)*20);
 			if (i >= item_num_before)	//如果当前列表中的项目数量大于之前的数量，则需要在不够时插入新的项目
 			{
 				InsertItem(i, str);
