@@ -47,11 +47,9 @@ void progress_callback(void *userdata, double downloadSpeed, double remainingTim
 
 void CDownloadListCtrl::Download(const SongInfo& si)
 {
-	std::wstring app_path = CPlayer::GetInstance().GetAppPath();
-
 	CFilePathHelper path_helper(si.file_name);
 	std::wstring ext = path_helper.GetFileExtension();
-	std::wstring down_folder = app_path + L"songs//";
+	std::wstring down_folder = CPlayer::GetInstance().GetSongPath();
 	std::wstring filename = si.title + L"." + ext;
 
 	int newRow = GetItemCount();

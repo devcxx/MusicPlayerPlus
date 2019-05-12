@@ -78,6 +78,58 @@ wstring CFilePathHelper::GetParentDir() const
 	return m_file_path.substr(0, index + 1);
 }
 
+
+bool CFilePathHelper::FileExist()
+{
+	return PathFileExists(m_file_path.c_str()) == TRUE ? true : false;
+}
+
+
+bool CFilePathHelper::DirectoryExist()
+{
+	WIN32_FIND_DATA fd;
+	bool ret = false;
+	HANDLE hFind = FindFirstFile(m_file_path.c_str(), &fd);
+	if ((hFind != INVALID_HANDLE_VALUE) && (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		ret = true;
+	FindClose(hFind);
+	return false;
+}
+
+
+bool CFilePathHelper::CreateDirectory()
+{
+	if (PathFileExists(m_file_path.c_str()))
+		return false;
+
+	size_t sPrePos = 0;
+	std::wstring strTmp = L"";
+	size_t sPos = m_file_path.find(L'\\');
+	if (sPos == std::wstring::npos)
+		return false;
+
+	strTmp = m_file_path.substr(0, sPos + 1);
+	if (!PathFileExists(strTmp.c_str()))
+		return false;
+
+	sPrePos = sPos + 1;
+	sPos = m_file_path.find(L'\\', sPrePos);
+	while (sPos != std::wstring::npos)
+	{
+		strTmp = m_file_path.substr(0, sPos);
+		if (!PathFileExists(strTmp.c_str()))
+			::CreateDirectory(strTmp.c_str(), NULL);
+
+		sPrePos = sPos + 1;
+		sPos = m_file_path.find(L'\\', sPrePos);
+	}
+
+	if (!PathFileExists(m_file_path.c_str()))
+		::CreateDirectory(m_file_path.c_str(), NULL);
+
+	return true;
+}
+
 const wstring& CFilePathHelper::ReplaceFileExtension(const wchar_t * new_extension)
 {
 	size_t index, index1;

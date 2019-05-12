@@ -2636,14 +2636,14 @@ UINT CMusicPlayerDlg::DownloadLyricAndCoverThreadFunc(LPVOID lpParam)
 			return 0;
 		}
 
-		if (PathIsURL(song.file_name.c_str())) { // 下载在线歌曲封面
-			std::wstring appPath = CPlayer::GetInstance().GetAppPath();
-			std::wstring cover_file_path;
-			CFilePathHelper cover_url(song.album_url);
-			cover_file_path = appPath + song.title + L"." + cover_url.GetFileExtension();
+		if (PathIsURL(song.file_name.c_str()))  // 下载在线歌曲封面
+		{ 
+			std::wstring album_file_path = CPlayer::GetInstance().GetAlbumPath();
+			CFilePathHelper album_url(song.album_url);
+			album_file_path = album_file_path + song.title + L"." + album_url.GetFileExtension();
 			//下面专辑封面
-			URLDownloadToFile(0, song.album_url.c_str(), cover_file_path.c_str(), 0, NULL);
-			CPlayer::GetInstance().GetAlbumCover().Load(cover_file_path.c_str());
+			URLDownloadToFile(0, song.album_url.c_str(), album_file_path.c_str(), 0, NULL);
+			CPlayer::GetInstance().GetAlbumCover().Load(album_file_path.c_str());
 		}
 		else {
 			//获取要保存的专辑封面的文件路径
@@ -2700,7 +2700,7 @@ UINT CMusicPlayerDlg::DownloadLyricAndCoverThreadFunc(LPVOID lpParam)
 		//}
 // 		lyric_path.ReplaceFileExtension(L"lrc");
 
-		std::wstring lyric_path = CPlayer::GetInstance().GetAppPath() + L"lyric//" + song.title + L".lrc";
+		std::wstring lyric_path = CPlayer::GetInstance().GetLyricPath() + song.title + L".lrc";
 
 		string _lyric_str = CCommon::UnicodeToStr(lyric_str, CodeType::UTF8);
 		ofstream out_put{ lyric_path, std::ios::binary };

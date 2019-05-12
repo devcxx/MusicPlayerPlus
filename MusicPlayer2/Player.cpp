@@ -1204,6 +1204,36 @@ std::wstring CPlayer::GetAppPath()
 	return str;
 }
 
+
+std::wstring CPlayer::GetLyricPath()
+{
+	std::wstring lyricPath = GetAppPath() + L"lyrics\\";
+	CFilePathHelper helper(lyricPath);
+	if (!helper.DirectoryExist())
+		helper.CreateDirectory();
+	return lyricPath;
+}
+
+
+std::wstring CPlayer::GetSongPath()
+{
+	std::wstring songsPath = GetAppPath() + L"songs\\";
+	CFilePathHelper helper(songsPath);
+	if (!helper.DirectoryExist())
+		helper.CreateDirectory();
+	return songsPath;
+}
+
+
+std::wstring CPlayer::GetAlbumPath()
+{
+	std::wstring albumsPath = GetAppPath() + L"albums\\";
+	CFilePathHelper helper(albumsPath);
+	if (!helper.DirectoryExist())
+		helper.CreateDirectory();
+	return albumsPath;
+}
+
 wstring CPlayer::GetFileName() const
 {
 	return (GetCurrentFileName().empty() ? CCommon::LoadText(IDS_FILE_NOT_FOUND).GetString() : GetCurrentFileName());

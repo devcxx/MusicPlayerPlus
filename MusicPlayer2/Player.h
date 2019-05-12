@@ -209,6 +209,9 @@ public:
 
 
 	std::wstring GetAppPath();
+	std::wstring GetLyricPath();
+	std::wstring GetSongPath();
+	std::wstring GetAlbumPath();
 
 	wstring GetCurrentFilePath() const { return m_path + GetCurrentFileName(); }		//获取正在播放文件的路径
 	int GetIndex() const { return m_index; }		//获取当前播放的曲目序号
