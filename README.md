@@ -1,5 +1,17 @@
 # MusicPlayer+
-基于[MusicPlayer2](https://github.com/zhongyang219/MusicPlayer2)二次开发，实现歌曲在线搜索、播放和下载功能。<br>
+
+
+```shell
+             _                
+|\/|    _o _|_)| _.   _ .__|_ 
+|  ||_|_>|(_|  |(_|\/(/_|  |  
+                   /          
+```
+
+本软件只用来交流测试与学习。<br>
+支持的搜索和下载平台：酷狗（网易，QQ将在以后的版本中加入进来）<br>
+
+MusicPlayer+基于[MusicPlayer2](https://github.com/zhongyang219/MusicPlayer2)二次开发，实现歌曲在线搜索、播放和下载功能。<br>
 目前使用酷狗API实现歌曲搜索和下载。
 
 ### MusicPlayer2
@@ -27,9 +39,10 @@
 ![](https://github.com/devcxx/MusicPlayerPlus/blob/master/Screenshots/Main_window2.png)<br>
 
 ### 开发计划
-- 64位编译环境
+- x64编译环境
 - 实现高品质音乐下载
 - 整合更多音乐源（QQ、网易云）
+- 使用NSIS制作安装包
 
 ### 捐赠
 如果对你有用，那就支持一下吧：）<br>
