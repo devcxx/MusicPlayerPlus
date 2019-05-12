@@ -41,7 +41,7 @@ void progress_callback(void *userdata, double downloadSpeed, double remainingTim
 	DownloadItem* item = static_cast<DownloadItem*>(userdata);
 	CDownloadListCtrl* ctrl = static_cast<CDownloadListCtrl*>(item->ctrl);
 	CString strPercent;
-	strPercent.Format(_T("%d%%"), (int)progressPercentage * 100);
+	strPercent.Format(_T("%.f%%"), progressPercentage);
 	ctrl->SetItemText(item->id, 3, strPercent);
 }
 

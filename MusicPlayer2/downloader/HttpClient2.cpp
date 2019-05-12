@@ -219,10 +219,10 @@ int HttpClient2::progress_callback(void *userdata, curl_off_t dltotal, curl_off_
         return 1;
 
     time_t now = time(NULL);
-	if (now - lastTime < 1)
-	{
-		return 0;
-	}
+// 	if (now - lastTime < 1)
+// 	{
+// 		return 0;
+// 	}
 	lastTime = now;
 
     Progress_User_Data *data = static_cast<Progress_User_Data *>(userdata);
