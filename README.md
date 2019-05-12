@@ -23,7 +23,7 @@
 ### 软件截图
 主窗口：<br>
 ![](https://github.com/devcxx/MusicPlayerPlus/blob/master/Screenshots/Main_window.png)<br>
-主窗口（隐藏播放列表）：
+主窗口（隐藏播放列表）：<br>
 ![](https://github.com/devcxx/MusicPlayerPlus/blob/master/Screenshots/Main_window2.png)<br>
 
 ### 开发计划
@@ -32,5 +32,5 @@
 - 整合更多音乐源（QQ、网易云）
 
 ### 捐赠
-如果对你有用,那就支持一下吧<br>
+如果对你有用，那就支持一下吧：）<br>
 ![捐赠](https://github.com/devcxx/MusicPlayerPlus/blob/master/pay.png "支持一下")
