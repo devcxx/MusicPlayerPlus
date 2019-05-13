@@ -42,12 +42,14 @@ void progress_callback(void *userdata, double downloadSpeed, double remainingTim
 	CDownloadListCtrl* ctrl = static_cast<CDownloadListCtrl*>(item->ctrl);
 	CString strPercent;
 	strPercent.Format(_T("%.f%%"), progressPercentage);
-	ctrl->SetItemText(item->id, 3, strPercent);
+
+	ctrl->SetItemText(item->task_id, 3, strPercent);
 }
 
-void CDownloadListCtrl::Download(const SongInfo& si)
+void CDownloadListCtrl::Download(int item_id)
 {
-	CFilePathHelper path_helper(si.file_name);
+	SongInfo& si = CPlayer::GetInstance().GetPlayList()[item_id];
+	CFilePathHelper path_helper(si.play_url);
 	std::wstring ext = path_helper.GetFileExtension();
 	std::wstring down_folder = CPlayer::GetInstance().GetSongPath();
 	std::wstring filename = si.title + L"." + ext;
@@ -65,13 +67,15 @@ void CDownloadListCtrl::Download(const SongInfo& si)
 
 	DownItemPtr item( new DownloadItem);
 	item->ctrl = this;
-	item->id = newRow;
+	item->task_id = newRow;
+	item->item_id = item_id;
+	item->song = &si;
+	item->path = down_folder + filename;
+	item->song->file_name = item->path;
 
 	m_downItems.push_back(item);
 
-	Downloader::instance()->download(cvt::ws2s(si.file_name), cvt::ws2s(down_folder), cvt::ws2s(filename), item.get(), progress_callback);
-
-	m_all_song_info.push_back(si);
+	Downloader::instance()->download(cvt::ws2s(si.play_url), cvt::ws2s(down_folder), cvt::ws2s(filename), item.get(), progress_callback);
 
 // 	UpdateDownList();
 
@@ -81,24 +85,30 @@ void CDownloadListCtrl::UpdateDownList()
 {
 	CString str;
 	DeleteAllItems();
-	for (int i{}; i < m_all_song_info.size(); i++)
+	for (int i = 0; i < m_downItems.size(); i++)
 	{
 		str.Format(_T("%u"), i + 1);
 		InsertItem(i, str);
-		SetItemText(i, 1, (m_all_song_info[i].title).c_str());
-		SetItemText(i, 2, (m_all_song_info[i].file_name).c_str());
+
+		char fileSize[MAX_PATH] = { 0 };
+		SongInfo* si = m_downItems[i]->song;
+		utils::bytesToSize(si->filesize, fileSize, MAX_PATH);
+
+		SetItemText(i, 1, (si->title).c_str());
+		SetItemText(i, 2, cvt::s2ws(fileSize).c_str());
 	}
 }
 
 void CDownloadListCtrl::CalculateColumeWidth(vector<int>& width)
 {
-	width.resize(3);
+	width.resize(4);
 
 	width[0] = theApp.DPI(40);
 	width[2] = theApp.DPI(50);
+	width[3] = theApp.DPI(50);
 	CRect rect;
 	GetWindowRect(rect);
-	width[1] = rect.Width() - width[0] - width[2] - theApp.DPI(20) - 1;
+	width[1] = rect.Width() - width[0] - width[2] - width[3] - theApp.DPI(10) - 1;
 
 }
 
@@ -122,7 +132,7 @@ void CDownloadListCtrl::OnMouseMove(UINT nFlags, CPoint point)
 			m_nItem = lvhti.iItem;
 
 			// 如果鼠标移动到一个合法的行，则显示新的提示信息，否则不显示提示
-			if (m_nItem >= 0 && m_nItem < static_cast<int>(m_all_song_info.size()))
+			if (m_nItem >= 0 && m_nItem < static_cast<int>(m_downItems.size()))
 			{
 				CString dis_str = GetItemText(m_nItem, 1);
 				int strWidth = GetStringWidth(dis_str) + theApp.DPI(10);		//获取要显示当前字符串的最小宽度
@@ -142,26 +152,27 @@ void CDownloadListCtrl::OnMouseMove(UINT nFlags, CPoint point)
 					CString str = GetItemText(m_nItem, 0);
 					song_index = _ttoi(str) - 1;
 				}
-				if (song_index < 0 || song_index >= static_cast<int>(m_all_song_info.size()))
+				if (song_index < 0 || song_index >= static_cast<int>(m_downItems.size()))
 					return;
+				SongInfo* si = m_downItems[song_index]->song;
 				str_tip += CCommon::LoadText(IDS_FILE_NAME, _T(": "));
-				str_tip += m_all_song_info[song_index].file_name.c_str();
+				str_tip += si->file_name.c_str();
 				str_tip += _T("\r\n");
 
 				str_tip += CCommon::LoadText(IDS_TITLE, _T(": "));
-				str_tip += m_all_song_info[song_index].title.c_str();
+				str_tip += si->title.c_str();
 				str_tip += _T("\r\n");
 
 				str_tip += CCommon::LoadText(IDS_ARTIST, _T(": "));
-				str_tip += m_all_song_info[song_index].artist.c_str();
+				str_tip += si->artist.c_str();
 				str_tip += _T("\r\n");
 
 				str_tip += CCommon::LoadText(IDS_ALBUM, _T(": "));
-				str_tip += m_all_song_info[song_index].album.c_str();
+				str_tip += si->album.c_str();
 				str_tip += _T("\r\n");
 
 				CString str_bitrate;
-				str_bitrate.Format(CCommon::LoadText(IDS_BITRATE, _T(": %dkbps")), m_all_song_info[song_index].bitrate);
+				str_bitrate.Format(CCommon::LoadText(IDS_BITRATE, _T(": %dkbps")), si->bitrate);
 				str_tip += str_bitrate;
 
 				m_toolTip.SetMaxTipWidth(theApp.DPI(400));		//设置提示信息的宽度，以支持提示换行
@@ -218,7 +229,7 @@ void CDownloadListCtrl::PreSubclassWindow()
 	InsertColumn(0, CCommon::LoadText(IDS_NUMBER), LVCFMT_LEFT, width[0]);		//插入第1列
 	InsertColumn(1, CCommon::LoadText(IDS_TRACK), LVCFMT_LEFT, width[1]);		//插入第2列
 	InsertColumn(2, _T("大小"), LVCFMT_LEFT, width[2]);		//插入第3列
-	InsertColumn(3, _T("进度"), LVCFMT_LEFT, width[2]);		//插入第3列
+	InsertColumn(3, _T("进度"), LVCFMT_LEFT, width[3]);		//插入第3列
 	EnableTip();
 
 	SetRowHeight(theApp.DPI(24));
@@ -251,7 +262,7 @@ void CDownloadListCtrl::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
 			else
 			{
 				int hightlight_item;
-				if (!m_searched || m_search_result.size() == m_all_song_info.size())	//当播放列表不处理搜索状态，或搜索结果数量等于播放列表中曲目数量时
+				if (!m_searched || m_search_result.size() == m_downItems.size())	//当播放列表不处理搜索状态，或搜索结果数量等于播放列表中曲目数量时
 				{
 					hightlight_item = m_highlight_item;
 				}

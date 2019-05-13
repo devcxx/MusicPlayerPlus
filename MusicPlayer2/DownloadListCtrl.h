@@ -9,7 +9,9 @@
 struct DownloadItem {
 	void* ctrl;
 	SongInfo* song;
-	int id;
+	int item_id;
+	std::wstring path;
+	int task_id;
 };
 
 typedef boost::shared_ptr<DownloadItem> DownItemPtr;
@@ -27,9 +29,11 @@ public:
 
 	void EnableTip(bool enable = true) { m_bEnableTips = enable; }		//设置是否开启提示
 
-	void Download(const SongInfo& si);
+	void Download(int item_id);
 
 	void UpdateDownList();
+
+	vector<DownItemPtr>& DownItems() { return m_downItems; }
 
 protected:
 
@@ -38,7 +42,7 @@ protected:
 								//int m_nSubItem;			//存放列号
 	bool m_bEnableTips{ false };	//是否开启文本提示
 
-	vector<SongInfo> m_all_song_info;		//储存播放列表中所有歌曲的信息
+// 	vector<SongInfo> m_all_song_info;		//储存播放列表中所有歌曲的信息
 	vector<int> m_search_result;					//储存快速搜索结果的歌曲序号
 	bool m_searched{ false };
 	vector <DownItemPtr> m_downItems;

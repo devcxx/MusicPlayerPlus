@@ -520,7 +520,12 @@ void CPlayer::MusicControl(Command command, int volume_step)
 	{
 	case Command::OPEN:
 		m_error_code = 0;
-		m_musicStream = BASS_StreamCreateURL(GetCurrentFileName().c_str(), 0, 0, NULL, NULL);
+		if (!GetCurrentFileName().empty()) {
+			m_musicStream = BASS_StreamCreateFile(FALSE, GetCurrentFileName().c_str(), 0, 0, BASS_SAMPLE_FLOAT);
+		} else if (!GetCurrentPlayURL().empty()){
+			m_musicStream = BASS_StreamCreateURL(GetCurrentPlayURL().c_str(), 0, 0, NULL, NULL);
+		}
+		
 		BASS_ChannelGetInfo(m_musicStream, &m_channel_info);
 		m_is_midi = (CAudioCommon::GetAudioTypeByBassChannel(m_channel_info.ctype) == AudioType::AU_MIDI);
 		if (m_bass_midi_lib.IsSuccessed() && m_is_midi && m_sfont.font != 0)
@@ -1163,6 +1168,14 @@ void CPlayer::ExplorePath(int track) const
 	}
 }
 
+
+void CPlayer::ExplorePath(const std::wstring& path)
+{
+	CString str;
+	str.Format(_T("/select,\"%s\""), path.c_str());
+	ShellExecute(NULL, _T("open"), _T("explorer"), str, NULL, SW_SHOWNORMAL);
+}
+
 void CPlayer::ExploreLyric() const
 {
 	if (!m_Lyrics.IsEmpty())
@@ -1795,6 +1808,15 @@ wstring CPlayer::GetCurrentFileName() const
 {
 	if (m_index >= 0 && m_index < GetSongNum())
 		return m_playlist[m_index].file_name;
+	else
+		return wstring();
+}
+
+
+wstring CPlayer::GetCurrentPlayURL() const
+{
+	if (m_index >= 0 && m_index < GetSongNum())
+		return m_playlist[m_index].play_url;
 	else
 		return wstring();
 }

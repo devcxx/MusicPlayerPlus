@@ -88,6 +88,7 @@ struct SongInfo
 
 
 	wstring file_name{};	//歌曲的文件名
+	wstring play_url{};		// URL资源
 	wstring lyric_file{};	//匹配的歌词文件的路径
 	Time lengh;			//歌曲的长度
 	int duration;		// 歌曲时长（毫秒）

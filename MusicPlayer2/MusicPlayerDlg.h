@@ -271,6 +271,8 @@ public:
 	afx_msg void OnDownloadAlbumCover();
 protected:
 	afx_msg LRESULT OnMusicStreamOpened(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPlaySelectedItem(WPARAM wParam, LPARAM lParam);
+
 public:
 	afx_msg void OnCurrentExploreOnline();
 	afx_msg void OnDeleteAlbumCover();

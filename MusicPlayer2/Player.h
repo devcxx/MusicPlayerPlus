@@ -13,6 +13,7 @@
 #define WM_SET_TITLE (WM_USER+106)					//设置窗口标题的消息
 #define WM_CONNOT_PLAY_WARNING (WM_USER+108)		//无法播放文件时弹出警告提示框的消息
 #define WM_MUSIC_STREAM_OPENED (WM_USER+109)		//当音频文件打开时的消息
+#define WM_PLAY_SELECTED_ITEM (WM_USER+200)		//当音频文件打开时的消息
 
 struct MidiInfo
 {
@@ -200,6 +201,7 @@ public:
 	void IniLyrics(const wstring& lyric_path);
 
 	void ExplorePath(int track = -1) const;	//用资源管理器打开当前路径并选中指定指定文件（当track小于0时选中当前正在播放的文件）
+	void ExplorePath(const std::wstring& path);
 	void ExploreLyric() const;		//用资源管理器打开歌词文件所在的位置
 
 	vector<SongInfo>& GetPlayList() { return m_playlist; }	//获取播放列表的引用
@@ -270,6 +272,7 @@ private:
 	void SearchAlbumCover();		//获取专辑封面
 	void GetMidiPosition();			//获取MIDI音乐的播放进度
 	wstring GetCurrentFileName() const;
+	wstring GetCurrentPlayURL() const;
 
 public:
 	static void AcquireSongInfo(HSTREAM hStream, const wstring& file_path, SongInfo& song_info);		//获取歌曲标签等信息

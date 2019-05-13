@@ -180,6 +180,7 @@ BEGIN_MESSAGE_MAP(CMusicPlayerDlg, CMainDialogBase)
 	ON_MESSAGE(WM_MAIN_MENU_POPEDUP, &CMusicPlayerDlg::OnMainMenuPopup)
 	ON_COMMAND(ID_ALWAYS_ON_TOP, &CMusicPlayerDlg::OnAlwaysOnTop)
 	ON_COMMAND(ID_FLOAT_PLAYLIST, &CMusicPlayerDlg::OnFloatPlaylist)
+	ON_MESSAGE(WM_PLAY_SELECTED_ITEM, &CMusicPlayerDlg::OnPlaySelectedItem)
 END_MESSAGE_MAP()
 
 
@@ -1017,7 +1018,7 @@ BOOL CMusicPlayerDlg::OnInitDialog()
 	SetTimer(TIMER_1_SEC, 1000, NULL);
 
 	// 创建下载管理器窗口
-	m_pDownloadMgrDlg = new CDownloadMgrDlg();
+	m_pDownloadMgrDlg = new CDownloadMgrDlg(this);
 	m_pDownloadMgrDlg->Create(IDD_DOWN_MGR_DLG);
 	m_pDownloadMgrDlg->ShowWindow(SW_HIDE);
 
@@ -1977,7 +1978,7 @@ void CMusicPlayerDlg::OnPlayItem()
 
 void CMusicPlayerDlg::OnDownloadItem()
 {
-	m_pDownloadMgrDlg->GetDownList().Download(CPlayer::GetInstance().GetPlayList().at(m_item_selected));
+	m_pDownloadMgrDlg->GetDownListCtrl().Download(m_item_selected);
 }
 
 void CMusicPlayerDlg::OnItemProperty()
@@ -2653,41 +2654,21 @@ UINT CMusicPlayerDlg::DownloadLyricAndCoverThreadFunc(LPVOID lpParam)
 		{
 			return 0;
 		}
+	
+		//获取要保存的专辑封面的文件路径
+		std::wstring album_file_path = CPlayer::GetInstance().GetAlbumPath();
+		CFilePathHelper album_url(song.album_url);
+		album_file_path = album_file_path + song.title + L"." + album_url.GetFileExtension();
 
-		if (PathIsURL(song.file_name.c_str()))  // 下载在线歌曲封面
-		{ 
-			std::wstring album_file_path = CPlayer::GetInstance().GetAlbumPath();
-			CFilePathHelper album_url(song.album_url);
-			album_file_path = album_file_path + song.title + L"." + album_url.GetFileExtension();
-			//下面专辑封面
-			URLDownloadToFile(0, song.album_url.c_str(), album_file_path.c_str(), 0, NULL);
-			CPlayer::GetInstance().GetAlbumCover().Load(album_file_path.c_str());
-		}
-		else {
-			//获取要保存的专辑封面的文件路径
-			CFilePathHelper cover_file_path;
-			if (match_item.album == song.album)		//如果在线搜索结果的唱片集名称和歌曲的相同，则以“唱片集”为文件名保存
-			{
-				wstring album_name{ match_item.album };
-				CCommon::FileNameNormalize(album_name);
-				cover_file_path.SetFilePath(CPlayer::GetInstance().GetCurrentDir() + album_name);
-			}
-			else				//否则以歌曲文件名为文件名保存
-			{
-				cover_file_path.SetFilePath(CPlayer::GetInstance().GetCurrentDir() + song.file_name);
-			}
-			CFilePathHelper url_path(cover_url);
-			cover_file_path.ReplaceFileExtension(url_path.GetFileExtension().c_str());
+		//下面专辑封面
+		URLDownloadToFile(0, song.album_url.c_str(), album_file_path.c_str(), 0, NULL);
 
-			//下面专辑封面
-			URLDownloadToFile(0, cover_url.c_str(), cover_file_path.GetFilePath().c_str(), 0, NULL);
+		//将下载的专辑封面改为隐藏属性
+// 		SetFileAttributes(album_file_path.c_str(), FILE_ATTRIBUTE_HIDDEN);
 
-			//将下载的专辑封面改为隐藏属性
-			SetFileAttributes(cover_file_path.GetFilePath().c_str(), FILE_ATTRIBUTE_HIDDEN);
-
-			//重新从本地获取专辑封面
-			CPlayer::GetInstance().SearchOutAlbumCover();
-		}
+		//重新从本地获取专辑封面
+// 		CPlayer::GetInstance().SearchOutAlbumCover();
+		CPlayer::GetInstance().GetAlbumCover().Load(album_file_path.c_str());
 		
 		::PostMessage(theApp.m_pMainWnd->GetSafeHwnd(), WM_ALBUM_COVER_DOWNLOAD_COMPLETE, 0, 0);
 	}
@@ -2882,7 +2863,7 @@ void CMusicPlayerDlg::UpdateSearchList()
 				int bit_rate = downinfo["bitRate"].asInt();
 				cvt::eraseSubStr(album_url, "{size}/");
 				songInfo.album_url = cvt::s2ws(album_url);
-				songInfo.file_name = cvt::s2ws(downinfo["url"].asString());
+				songInfo.play_url = cvt::s2ws(downinfo["url"].asString());
 				songInfo.artist = cvt::s2ws(downinfo["singerName"].asString());
 				songInfo.duration = downinfo["timeLength"].asInt() * 1000;
 				songInfo.filesize = downinfo["fileSize"].asInt();
@@ -2959,6 +2940,16 @@ afx_msg LRESULT CMusicPlayerDlg::OnMusicStreamOpened(WPARAM wParam, LPARAM lPara
 	return 0;
 }
 
+
+LRESULT CMusicPlayerDlg::OnPlaySelectedItem(WPARAM wParam, LPARAM lParam)
+{
+	int itemID = (int)(wParam);
+	CPlayer::GetInstance().PlayTrack(itemID);
+	SwitchTrack();
+	UpdatePlayPauseButton();
+
+	return 0;
+}
 
 void CMusicPlayerDlg::OnCurrentExploreOnline()
 {
