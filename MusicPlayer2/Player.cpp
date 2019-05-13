@@ -521,7 +521,10 @@ void CPlayer::MusicControl(Command command, int volume_step)
 	case Command::OPEN:
 		m_error_code = 0;
 		if (!GetCurrentFileName().empty()) {
-			m_musicStream = BASS_StreamCreateFile(FALSE, GetCurrentFileName().c_str(), 0, 0, BASS_SAMPLE_FLOAT);
+			std::wstring filename = GetCurrentFileName();
+			if (PathIsRelative(filename.c_str()))
+				filename = m_path + filename;
+			m_musicStream = BASS_StreamCreateFile(FALSE, filename.c_str(), 0, 0, BASS_SAMPLE_FLOAT);
 		} else if (!GetCurrentPlayURL().empty()){
 			m_musicStream = BASS_StreamCreateURL(GetCurrentPlayURL().c_str(), 0, 0, NULL, NULL);
 		}
